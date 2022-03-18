@@ -1,0 +1,126 @@
+				  X
+
+  The ‹x› module for Go provides extensions to some of the packages
+  provided by the Go standard library.  The general idea is to stay
+  true to the spirit of the Go standard library, while providing
+  additional utility, primarily in the realm of testing.
+
+§ JSON compound literals
+
+    To compare JSON http.Request and http.Response bodies against wanted
+    results one creates compound literals using ‹map[string]interface{}›
+    for JSON objects, ‹[]interface{}› for JSON arrays, string literals
+    for JSON strings, float literals for JSON numbers, and nil for JSON
+    null.  The types of the JSON objects and arrays is a bit messy,
+    however, and it makes for rather hard-to-read compound literals:
+
+      want := map[string]interface{}{
+        "a": []interface{}{1, 2, 3},
+        "b": map[string]interface{}{
+          "c": 4,
+        },
+      }
+
+    Go 1.18 makes this much easier on the eyes with the addition of the
+    ‹any› type that’s semantically equivalent to ‹interface{}›:
+
+      want := map[string]any{
+        "a": []any{1, 2, 3},
+        "b": map[string]any{
+          "c": 4,
+        },
+      }
+
+    But until that version of Go is widely supported, ‹x› provides an
+    alternative:
+
+      want := json.Object{
+        "a": json.Array{1, 2, 3},
+        "b": json.Object{
+          "c": 4,
+        },
+      }
+
+    One can argue that this remains easier to read than the
+    alternative using ‹any›, as it makes the intention of representing
+    JSON data clearer.
+
+§ Logging framework
+
+    There’s a minimal logging framework in ‹x› that utilizes the
+    ‹context› package to pass around the logger to use.  Logging is
+    done in a structured fashion.
+
+    The use pattern is to first set up a ‹context.Context› with your
+    logger in it and then access this wherever you need it.
+
+      ctx := log.Testing(context.Background(), t)
+      some.Function(ctx, …)
+
+    Where ‹some.Function› can then do logging that will, in this case,
+    be shown if ‹testing.T t› fails:
+
+      func Function(ctx context.Context, …) {
+        log.Entry(ctx, "doing work")
+      }
+
+§ Net/HTTP extensions
+
+    The extensions to the ‹net/http› and the ‹net/httptest› packages
+    are mainly in storing and accessing a ‹*http.Client› in a
+    ‹context.Context› and making it easier to create and compare
+    ‹*http.Request›s and ‹*http.Response›s, especially when working
+    with JSON data.
+
+      want := 1
+      var got int
+      b := xhttp.NewRequestBuilder("https://example.com").
+      	basicAuth("u", "p").
+	JSONBody("abc").
+	JSONResult(&got)
+      expression := fmt.Sprintf("%#v.Post(…)", b)
+      if _, err := b.Post(httptest.Using(context.Background(), func(r *http.Request) (*http.Response, error) {
+        want := httptest.JSONRequest{
+          Method: http.MethodPost,
+	  URL:    "https://example.com",
+	  Header: http.Header{
+	    "Authorization": []string{"Basic dTpw"},
+            "Content-Type":  []string{"application/json"},
+          },
+          Body: "abc",
+        }
+        if got, err := httptest.NewJSONRequest(r); err != nil {
+          t.Errorf("%s = %v, want nil", expression, err)
+        } else if diff := cmp.Diff(got, want); diff != "" {
+          t.Errorf("%s diff -got +want\n%s", expression, diff)
+        }
+        return xhttp.NewResponseBuilder().JSONBody(1).OK(), nil
+      })); err != nil {
+        t.Errorf("%s = %v, want %#v", expression, err, nil)
+      } else if got != want {
+        t.Errorf("%s = %#v, want %#v", expression, got, want)
+      }
+
+    This is still a bit messy, but it does test a full round-tripping
+    of a request and response.  You would also more likely pass in the
+    ‹context.Context› with the ‹func› transporter that would verify
+    that the system under test sent the wanted request and you would
+    then provide a canned response.
+
+§ Time extensions
+
+    The ‹time› extensions again provide functionality that puts
+    getting the current time into a ‹context.Context›.
+
+      ctx := time.Default(context.Background())
+      …
+      now := time.In(ctx)
+
+    This is especially useful during testing, when you want full
+    control over what gets reported as being the current ‹time.Time›.
+
+      ctx := time.Stopped(context.Background(), time.MustDate(t, …))
+
+    Here you also see the ‹time.MustDate› function that fatals the
+    ‹testing.T t› if the ‹time.Time› specified can’t be created due to
+    a missing ‹time.Location›.
