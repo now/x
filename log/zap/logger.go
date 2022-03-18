@@ -33,12 +33,12 @@ func (l Logger) Entry(message string, fields ...log.Field) error {
 }
 
 // Named is a new Logger wrapping l.Zap.Named(name).
-func (l Logger) Named(name string) Logger {
+func (l Logger) Named(name string) log.Logger {
 	return Logger{l.Zap.Named(name)}
 }
 
 // With is a new Logger wrapping l.Zap.With(fields...).
-func (l Logger) With(fields ...log.Field) Logger {
+func (l Logger) With(fields ...log.Field) log.Logger {
 	return Logger{l.Zap.With(zapFields(fields...)...)}
 }
 
