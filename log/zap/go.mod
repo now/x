@@ -3,7 +3,7 @@ module github.com/now/x/log/zap
 go 1.17
 
 require (
-	github.com/now/x v0.0.0
+	github.com/now/x v0.1.0
 	go.uber.org/zap v1.21.0
 )
 
