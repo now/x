@@ -279,6 +279,10 @@ type testingWriter struct {
 	separate  bool
 }
 
+func (w *testingWriter) Int(i int) error {
+	return w.Int64(int64(i))
+}
+
 func (w *testingWriter) Int64(i int64) error {
 	w.separator()
 	w.b = strconv.AppendInt(w.b, i, 10)

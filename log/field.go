@@ -23,6 +23,11 @@ func Error(err error) Field {
 	return Field{"error", value.Error{Err: err}}
 }
 
+// Int Field with label and value.Int(i).
+func Int(label string, i int) Field {
+	return Field{label, value.Int(i)}
+}
+
 // Int64 Field with label and value.Int64(i).
 func Int64(label string, i int64) Field {
 	return Field{label, value.Int64(i)}

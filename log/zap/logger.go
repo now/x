@@ -48,6 +48,8 @@ func zapFields(fields ...log.Field) []zap.Field {
 		switch v := f.Value.(type) {
 		case value.Error:
 			zapFields[i] = zap.Error(v.Err)
+		case value.Int:
+			zapFields[i] = zap.Int(f.Label, int(v))
 		case value.Int64:
 			zapFields[i] = zap.Int64(f.Label, int64(v))
 		case value.Reflect:

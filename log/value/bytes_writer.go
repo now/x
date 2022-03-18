@@ -10,6 +10,10 @@ type BytesWriter struct {
 	separate bool
 }
 
+func (w *BytesWriter) Int(i int) error {
+	return w.Int64(int64(i))
+}
+
 func (w *BytesWriter) Int64(i int64) error {
 	w.Bytes = strconv.AppendInt(w.Bytes, i, 10)
 	return nil

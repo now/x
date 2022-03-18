@@ -10,6 +10,7 @@ import (
 // This and the log.Value interface comprises a double dispatch for log.Fields
 // to write themselves in a typed manner.
 type Writer interface {
+	Int(int) error             // Int writes an int.
 	Int64(int64) error         // Int64 writes an int64.
 	Reflect(interface{}) error // Reflect writes any value using reflection.
 	String(string) error       // String writes a string.

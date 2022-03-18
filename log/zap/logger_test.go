@@ -32,6 +32,7 @@ func TestLoggerEntry(t *testing.T) {
 			want  string
 		}{
 			{log.Error(fmt.Errorf("failed")), `"error": "failed"`},
+			{log.Int("ID", 1), `"ID": 1`},
 			{log.Int64("ID", 1), `"ID": 1`},
 			{log.Int64("neg", -1), `"neg": -1`},
 			{log.Reflect("values", map[string]int{"a": 1}), `"values": {"a":1}`},

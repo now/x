@@ -27,6 +27,25 @@ func TestError(t *testing.T) {
 	}
 }
 
+func TestInt(t *testing.T) {
+	tests := []struct {
+		label string
+		i     int
+		want  string
+	}{
+		{"ID", 1, "ID: 1"},
+	}
+	for _, tt := range tests {
+		expression := fmt.Sprintf("log.Int(%#v, %#v).Write(…)", tt.label, tt.i)
+		var w value.BytesWriter
+		if err := log.Int(tt.label, tt.i).Write(&w); err != nil {
+			t.Errorf("%s = %v, want %#v", expression, err, nil)
+		} else if got := string(w.Bytes); got != tt.want {
+			t.Errorf("%s = %#v, want %#v", expression, got, tt.want)
+		}
+	}
+}
+
 func TestInt64(t *testing.T) {
 	tests := []struct {
 		label string
