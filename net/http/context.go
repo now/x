@@ -46,6 +46,14 @@ func In(ctx context.Context) *http.Client {
 }
 
 // Key of http.Client in context.Context.
-const Key key = "HttpClient"
+var Key = key{}
 
-type key string
+type key struct{}
+
+func (key) GoString() string {
+	return "http.Key"
+}
+
+func (k key) String() string {
+	return k.GoString()
+}

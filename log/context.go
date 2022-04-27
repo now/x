@@ -148,9 +148,17 @@ func With(ctx context.Context, fields ...Field) context.Context {
 }
 
 // Key of Logger in context.Context.
-const Key key = "Logger"
+var Key = key{}
 
-type key string
+type key struct{}
+
+func (key) GoString() string {
+	return "log.Key"
+}
+
+func (k key) String() string {
+	return k.GoString()
+}
 
 var noper = nopLogger{}
 

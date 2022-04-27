@@ -31,6 +31,14 @@ func In(ctx context.Context) time.Time {
 }
 
 // Key of Clock in context.Context.
-const Key key = "Clock"
+var Key = key{}
 
-type key string
+type key struct{}
+
+func (key) GoString() string {
+	return "time.Key"
+}
+
+func (k key) String() string {
+	return k.GoString()
+}
